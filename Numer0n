@@ -1,0 +1,58 @@
+import random
+
+def duplication_check(num):
+    if len(num) == len(set(num)) and len(num) == 3:
+        return True
+
+def input_number(prompt):
+    print(prompt)
+    while True:
+        num = input('３桁の数字を入力：')
+        if duplication_check(num):
+            return num
+        print('再入力してください')
+
+def eat_bite_check(player_number,cpu_number):
+    global eat
+    global bite 
+    eat = 0
+    bite = 0
+    for n, m in zip(player_number, cpu_number):
+        if n == m:
+            eat += 1
+        elif n in cpu_number:
+            bite += 1
+    return (str(eat)+ 'EAT-'+ str(bite)+ 'BITE')
+
+def generate_number():
+    return ''.join(random.sample("0123456789", 3))
+
+def play_game():
+    player_number = input_number('まず始めにあなたの番号を決めます')
+    cpu_number = generate_number()
+
+    while True:
+        print('---------------------------------------------------')
+        player_number = input_number('コンピューターの３桁の数字を予想してください：')
+        eat, bite = eat_bite_check(player_number,cpu_number)
+        print(f'結果は[{eat}EAT-{bite}BITE]でした')
+        if eat == 3:
+            print('あなたの勝ちです')
+            return
+
+        print('コンピューターがあなたの番号を予想します')
+        player_number = generate_number()
+        print(f'コンピューターは{guess}と予想しました')
+        eat, bite = eat_bite_check(player_number,cpu_number)
+        print(f'結果は[{eat}EAT-{bite}BITE]でした')
+        if eat == 3:
+            print('あなたの負けです')
+            return
+
+if __name__ == '__main__':
+    print('ゲームを開始します')
+    play_game()
+    print('ゲームを終了します')
+
+
+
