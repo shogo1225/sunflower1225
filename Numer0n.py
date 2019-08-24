@@ -1,8 +1,12 @@
+
 import random
 
 def duplication_check(num):
-    if len(num) == len(set(num)) and len(num) == 3:
+    is_duble = ( len(num) == len(set(num)) )
+    is_3num = ( len(num) == 3 )
+    if is_duble and is_3num:
         return True
+
 
 def input_number(prompt):
     print(prompt)
@@ -12,9 +16,10 @@ def input_number(prompt):
             return num
         print('再入力してください')
 
+
 def eat_bite_check(player_number,cpu_number):
-    global eat
-    global bite 
+    #global eat
+    #global bite
     eat = 0
     bite = 0
     for n, m in zip(player_number, cpu_number):
@@ -22,10 +27,14 @@ def eat_bite_check(player_number,cpu_number):
             eat += 1
         elif n in cpu_number:
             bite += 1
-    return (str(eat)+ 'EAT-'+ str(bite)+ 'BITE')
+    
+    return eat, bite
+    #return (str(eat)+ 'EAT-'+ str(bite)+ 'BITE')
+
 
 def generate_number():
     return ''.join(random.sample("0123456789", 3))
+
 
 def play_game():
     player_number = input_number('まず始めにあなたの番号を決めます')
