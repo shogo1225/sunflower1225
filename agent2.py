@@ -3,6 +3,7 @@ from numpy.random import shuffle
 from random import choice
 import copy
 from common import *
+import random
 
 
 class NumeronAgent(object):
@@ -48,27 +49,30 @@ class NumeronAgent(object):
         -------
         call_number : list(str) 最もエントロピーが高くなる数字
         """
-        
-        if self.turn > 1:
-            '''
-            State情報を使ってもっと上手くやりたい
-            '''
-            shuffle(self.candidate)
+        level = random.randint(1,5)
+        if level <= 3:
+            if self.turn > 1:
+                '''
+                State情報を使ってもっと上手くやりたい
+                '''
+                shuffle(self.candidate)
 
-            if len(self.candidate) <= max_num:
-                array = self.candidate + self.all_candidate[:max_num - len(self.candidate)]
+                if len(self.candidate) <= max_num:
+                    array = self.candidate + self.all_candidate[:max_num - len(self.candidate)]
+                else:
+                    shuffle(self.all_candidate)
+                    array = self.all_candidate[:max_num]
+
+                entropy_list = map(lambda x: entropy(x, self.candidate[:max_num]), array)
+                call_number = array[np.argmax(entropy_list)]
+
             else:
-                shuffle(self.all_candidate)
-                array = self.all_candidate[:max_num]
-
-            entropy_list = map(lambda x: entropy(x, self.candidate[:max_num]), array)
-            call_number = array[np.argmax(entropy_list)]
-
+                call_number = choice(self.candidate)
+                print('call number: {}'.format(call_number))
+                return call_number
         else:
             call_number = choice(self.candidate)
             print('call number: {}'.format(call_number))
-            return call_number
-        
 
     def update_candidate(self, judge, call_number):
         """
