@@ -1,51 +1,137 @@
-from agent2 import NumeronAgent, NumeronHumanAgent
+from itertools import permutations
+from numpy.random import shuffle
+from random import choice
+import copy
+from common import *
+import random
 
 
-class Game(object):
+class NumeronAgent(object):
     """
-    Numeron対戦用クラス
+    Numeron Player(AI)
     """
 
-    def __init__(self, player1, player2):
-        self.player1 = player1
-        self.player2 = player2
-        self.nof_turns = 1
+    "def level_AI_decision(self):"    
+        
 
-    def main(self):
-        self.nof_turns = 1
-        is_over = False
-        while True:
-            print('---------- Turn {} ----------'.format(self.nof_turns))
-            print('---- pleyer1\'s turn ----')
-            is_over = self.player1.action(self.player2)
-            if is_over:
-                return None
-            print('---- pleyer2\'s turn ----')
-            is_over = self.player2.action(self.player1)
-            if is_over:
-                return None
-            self.nof_turns += 1
+    def __init__(self, number=None):
+        self.candidate = [''.join(i) for i in permutations(CHARS, DIGITS)] 
+        if number is None:
+            number = choice(self.candidate)
+
+        if type(number) in [str, int]:
+            number = list(str(number))
+
+        self.number = number
+        self.turn = 1
+        assert len(number) == DIGITS
+        self.all_candidate = copy.deepcopy(self.candidate)
+
+    def reply_coincidence(self, opponent_call_number):
+        """
+        相手の宣言した数字に対し、eatとbiteの数を返す
+        Parameters
+        ----------
+        opponent_call_number : list(str) 相手の宣言した数字
+        Returns
+        -------
+        Judge eatとbiteの数
+        """
+        return coincidence(self.number, opponent_call_number)
+
+    def decide_call_number(self, max_num=1000):
+        """
+        次の宣言する数字を決める
+        Parameters
+        ----------
+        max_num : int 探索数
+        Returns
+        -------
+        call_number : list(str) 最もエントロピーが高くなる数字
+        """
+        self.level = random.randint(1,5)
+        if self.level <= 3:
+            if self.turn > 1:
+                '''
+                State情報を使ってもっと上手くやりたい
+                '''
+                shuffle(self.candidate)
+
+                if len(self.candidate) <= max_num:
+                    array = self.candidate + self.all_candidate[:max_num - len(self.candidate)]
+                else:
+                    shuffle(self.all_candidate)
+                    array = self.all_candidate[:max_num]
+
+                entropy_list = map(lambda x: entropy(x, self.candidate[:max_num]), array)
+                call_number = array[np.argmax(entropy_list)]
 
 
+                
 
-def PlayOneGame():
-    player1 = NumeronHumanAgent()
-    player2 = NumeronAgent()
-      
-    game = Game(player1, player2)
-    game.main()
-    nof_turns = game.nof_turns
+            else:
 
-    del player1,player2,game
+                call_number = choice(self.candidate)
+                print('debug!!!!!!!!!!!!!!!!!!!!!')
+                print("random choice")
+                print(call_number)
+                print()
+                print()
+                #print('call number: {}'.format(call_number))
+                
 
-    return nof_turns
+        else:
+            call_number = choice(self.candidate)
+            #print('call number: {}'.format(call_number))
 
-if __name__ == '__main__':
-    nof_turns_list = []
-    for i in range(0,100):
-        nof_turns = PlayOneGame()
-        nof_turns_list.append(nof_turns)
-    
-    ave = sum(nof_turns_list) /len(nof_turns_list)
-    print('平均ターン数は'+ str(ave) + 'です')
-    
+        
+        return call_number
+
+    def update_candidate(self, judge, call_number):
+        """
+        候補を更新
+        Parameters
+        ----------
+        judge : Judge 今回のeatとbite
+        call_number : list(str) 今回の宣言した数字
+        """
+        self.candidate = list(filter(lambda x: coincidence(x, call_number) == judge, self.candidate))
+
+    def action(self, opponent):
+        """
+        1ターンの一連のアクションを行う
+        Parameters
+        ----------
+        opponent : NumeronAgent
+        """
+        call_number = self.decide_call_number()
+        j = opponent.reply_coincidence(call_number)
+        print(j)
+        if j.eat == DIGITS:
+            print('WIN!!!')
+            return True
+            
+        if self.level <= 3:
+            self.update_candidate(j, call_number)
+        print('candidate: {}'.format(len(self.candidate)))
+        self.turn += 1
+        return False
+
+
+class NumeronHumanAgent(NumeronAgent):
+    """
+    Numeron Player(人間)
+    """
+
+    def __init__(self, number=None):
+        self.candidate = [''.join(i) for i in permutations(CHARS, DIGITS)]
+        if number is None:
+            number = choice(self.candidate)
+
+        if type(number) in [str, int]:
+            number = list(str(number))
+
+        self.number = number
+        self.turn = 1
+        assert len(number) == DIGITS
+        self.all_candidate = copy.deepcopy(self.candidate)
